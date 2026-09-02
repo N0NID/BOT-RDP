@@ -34,9 +34,6 @@ jobs:
         echo ComputerName="$_CName" >> $GITHUB_ENV
         echo AuthPin="$_Pin" >> $GITHUB_ENV
     - name: Initializing Setup
-      # Change this:
-      run: ./GRDPiz-Setup.ps1 ${{ env.ComputerName }}
-      # To this:
       run: ./GRDP-Setup.ps1 ${{ env.ComputerName }}
     - name: Starting Google Remote Desktop
       run: ${{ env.AuthCode }} -pin=${{ env.AuthPin }}
