@@ -1,7 +1,18 @@
-Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
-& {$P = $env:TEMP + '\chromeremotedesktophost.msi'; Invoke-WebRequest 'https://dl.google.com/edgedl/chrome-remote-desktop/chromeremotedesktophost.msi' -OutFile $P; Start-Process $P -Wait; Remove-Item $P}
-& {$P = $env:TEMP + '\chrome_installer.exe'; Invoke-WebRequest 'https://dl.google.com/chrome/install/latest/chrome_installer.exe' -OutFile $P; Start-Process -FilePath $P -Args '/install' -Verb RunAs -Wait; Remove-Item $P}
+$ProgressPreference = 'SilentlyContinue'
 
-if ($args[1]) { WMIC computersystem where caption=$(hostname) rename $args[1] }
-sc start audiosrv
-sc config Audiosrv start= auto
+# Download Chrome Remote Desktop Host
+Write-Host "Downloading Chrome Remote Desktop Host..."
+$crdUrl = "https://dl.google.com/edgedl/chrome-remote-desktop/chromeremotedesktophost.msi"
+$crdPath = "$env:TEMP\chromeremotedesktophost.msi"
+Invoke-WebRequest -Uri $crdUrl -OutFile $crdPath -UseBasicParsing
+
+# Install Chrome Remote Desktop Host silently
+Write-Host "Installing Chrome Remote Desktop Host..."
+$process = Start-Process msiexec.exe -ArgumentList "/i `"$crdPath`" /qn /norestart" -Wait -PassThru
+
+if ($process.ExitCode -ne 0) {
+    Write-Error "MSI installer exited with code $($process.ExitCode)"
+    exit 1
+}
+
+Write-Host "CRD Host installed successfully."
